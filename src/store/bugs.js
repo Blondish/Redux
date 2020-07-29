@@ -1,80 +1,80 @@
-//action types
-const BUG_ADDED = "bugAdded";
-const BUG_REMOVED = "bugRemoved";
-const BUG_RESOLVED = "bugResolved";
-
-//actions created
-
-export function bugAdded(description) {
-  return {
-    type: BUG_ADDED,
-    payload: {
-      description: description
-    }
-  };
-}
-
-export function bugRemoved(id) {
-  return {
-    type: BUG_REMOVED,
-    payload: {
-      id: id
-    }
-  };
-}
-
-export function bugResolved(id) {
-  return {
-    type: BUG_RESOLVED,
-    payload: {
-      id: id
-    }
-  };
-}
-
-//reducers
+import { createAction, createReducer, createSlice } from "@reduxjs/toolkit";
 
 let currID = 0;
 
-//initial state is defined by undefined by redux. we need to reassign the state.
-
-export default function reducer(state = [], action) {
-  if (action.type === BUG_ADDED) {
-    return [
-      ...state,
-      {
+const slice = createSlice({
+  name: "bugs",
+  initialState: [],
+  reducers: {
+    bugAdded: (state, action) => {
+      state.push({
         id: ++currID,
         description: action.payload.description,
         resolved: false
-      }
-    ];
-  } else if (action.type === BUG_REMOVED) {
-    return state.filter(bug => bug.id !== action.payload.id);
-  } else if (action.type === BUG_RESOLVED) {
-    return state.map(bug =>
-      bug.id !== action.payload.id ? bug : { ...bug, resolved: true }
-    );
+      });
+    },
+    bugResolved: (state, action) => {
+      const index = state.findIndex(bug => bug.id === action.payload.id);
+      state[index].resolved = true;
+    },
+    bugRemoved: (state, action) => {
+      const index = state.findIndex(bug => bug.id === action.payload.id);
+      state.splice(index, 1);
+    }
   }
+});
 
-  return state;
-}
+export default slice.reducer;
+export const { bugAdded, bugResolved, bugRemoved } = slice.actions;
 
-// using Switch&Case:
+//actions created
 
-function reducer1(state = [], action) {
-  switch (action.type) {
-    case BUG_ADDED:
-      return [
-        ...state,
-        {
-          id: ++currID,
-          description: action.payload.description,
-          resolved: false
-        }
-      ];
-    case BUG_REMOVED:
-      return state.filter(bug => bug.id !== action.payload.id);
-    default:
-      return state;
-  }
-}
+// export const bugUpdated = createAction("bugUpdated");
+// export const bugAdded = createAction("bugAdded");
+// export const bugRemoved = createAction("bugRemoved");
+// export const bugResolved = createAction("bugResolved");
+
+// //reducers
+
+// //initial state is defined by undefined by redux. we need to reassign the state. [] is state
+
+// //redux toolkit uses immer under the hood. Therefore we do not need to make copies of the existing objects and arrays, it is done
+// // via immer y produce function. the code is immutable
+
+// export default createReducer([], {
+//   bugAdded: (state, action) => {
+//     state.push({
+//       id: ++currID,
+//       description: action.payload.description,
+//       resolved: false
+//     });
+//   },
+//   bugResolved: (state, action) => {
+//     const index = state.findIndex(bug => bug.id === action.payload.id);
+//     state[index].resolved = true;
+//   }
+// });
+
+// // export default function reducer1(state = [], action) {
+// //   switch (action.type) {
+// //     case bugAdded.type:
+// //       return [
+// //         ...state,
+// //         {
+// //           id: ++currID,
+// //           description: action.payload.description,
+// //           resolved: false
+// //         }
+// //       ];
+// //     case bugRemoved.type:
+// //       return state.filter(bug => bug.id !== action.payload.id);
+
+// //     case bugResolved.type:
+// //       return state.map(bug =>
+// //         bug.id !== action.payload.id ? bug : { ...bug, resolved: true }
+// //       );
+
+// //     default:
+// //       return state;
+// //   }
+// }
